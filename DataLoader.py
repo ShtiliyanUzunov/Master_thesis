@@ -1,14 +1,37 @@
 from scipy import ndimage
 import matplotlib.pyplot as plt
+import matplotlib
 import os
 
 photoCounter = 0
 
+matplotlib.rcParams.update({'font.size': 8})
+
 class Photo:
-    def __init__(self, name, data, landmarks):
+    def __init__(self, name, data, landmarks, path):
         self.name = name
         self.data = data
         self.landmarks = landmarks
+        self.path = path
+    
+    def loadData(self):
+        if self.data == None:
+            self.data = ndimage.imread(self.path, False, 'L')    
+        
+    def unloadData(self):
+        self.data = None
+    
+    def show(self, showLandmarks = True):
+        self.loadData()
+        plt.imshow(self.data, interpolation='none', cmap='Greys_r')
+        for index in range(len(self.landmarks)):
+            landmark = self.landmarks[index]
+            ax = plt.gcf().gca()
+            circle = plt.Circle((landmark[0], landmark[1]), 1, color='red')
+            ax.add_artist(circle)
+            #text = plt.Text(x = landmark[0], y = landmark[1], text=index, color='red')
+            #ax.add_artist(text)
+        plt.show()
 
 class PhotoSession:
     def __init__(self, name):
@@ -16,6 +39,18 @@ class PhotoSession:
         self.emotion = None
         self.facs = None
         self.photos = []
+        
+    def show(self):
+        for photo in self.photos:
+            photo.show()
+        
+    def loadSession(self):
+        for photo in self.photos:
+            photo.loadData()
+            
+    def unloadSession(self):
+        for photo in self.photos:
+            photo.unloadData()
 
 class FACSLabel:
     def __init__(self, code, intensity):
@@ -66,10 +101,24 @@ class DataLoader:
         for photo in os.listdir(photoFolder):
             if photo.endswith(".DS_Store"):
                 continue
+
+            landmark = photo.replace('.png', '_landmarks.txt')
+            landmarkPath = os.path.join(landmarkFolder, landmark)
+            landmarks = []
+            f = open(landmarkPath)
+            lines = f.readlines()
+            for line in lines:
+                if line == "\n":
+                    continue
+                strLm = line.strip().split("   ")
+                arrLm = [float(strLm[0]), float(strLm[1])]
+                landmarks.append(arrLm)
+            f.close()
+
             photoPath = os.path.join(photoFolder, photo)
-            photoCounter += 1
-            photoData = ndimage.imread(photoPath, True)
-            self.subjects[subject].sessions[session].photos.append(Photo(photo, photoData, None))
+            photoCounter = photoCounter+1
+            oPhoto = Photo(photo, None, landmarks, photoPath)
+            self.subjects[subject].sessions[session].photos.append(oPhoto)
         return
     
     def visitAllSessions(self, callback):
@@ -124,4 +173,4 @@ class DataLoader:
 
 dl = DataLoader()
 dl.printData()
-print photoCounter
+dl.subjects["S132"].sessions["006"].show()
