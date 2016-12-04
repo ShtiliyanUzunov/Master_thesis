@@ -16,7 +16,7 @@ class Photo:
     
     def loadData(self):
         if self.data == None:
-            self.data = ndimage.imread(self.path, False, 'L')    
+            self.data = ndimage.imread(self.path, False, 'L')
         
     def unloadData(self):
         self.data = None
@@ -51,6 +51,9 @@ class PhotoSession:
     def unloadSession(self):
         for photo in self.photos:
             photo.unloadData()
+            
+    def getPeakPhoto(self):
+        return self.photos[len(self.photos) - 1]
 
 class FACSLabel:
     def __init__(self, code, intensity):
@@ -171,6 +174,9 @@ class DataLoader:
                 print "\t\t facsCode: %s intensity: %s"%(session.facs.code, session.facs.intensity)
         return
 
-dl = DataLoader()
-dl.printData()
-dl.subjects["S132"].sessions["006"].show()
+#dl = DataLoader()
+#dl.subjects["S045"].sessions["002"].getPeakPhoto().show()
+#dl.printData()
+#print(dl.subjects["S132"].sessions["003"].photos[3].landmarks)
+#dl.subjects["S132"].sessions["003"].show()
+
