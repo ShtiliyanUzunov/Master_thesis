@@ -1,11 +1,6 @@
-'''
-Created on 7.11.2016
-@author: Shtiliyan
-'''
-
 from DataLoader import DataLoader
 from sklearn.svm import LinearSVC
-from sklearn.svm import NuSVC
+#from sklearn.svm import NuSVC
 from sklearn.svm import SVC
 from sklearn.cross_validation import train_test_split
 import matplotlib.pyplot as plt
@@ -37,8 +32,8 @@ def normalizeFeatures(features):
         xDiff = highestX - lowestX
         yDiff = highestY - lowestY
         
-        feature[0::2] = [ (x1 - lowestX) / xDiff for x1 in feature[0::2] ]
-        feature[1::2] = [ (y1 - lowestY) / yDiff for y1 in feature[1::2] ]
+        feature[0::2] = [ 400*(x1 - lowestX) / xDiff for x1 in feature[0::2] ]
+        feature[1::2] = [ 300*(y1 - lowestY) / yDiff for y1 in feature[1::2] ]
         
     return features
 

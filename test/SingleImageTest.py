@@ -1,8 +1,5 @@
-import os
-import numpy
 import matplotlib.pyplot as plt
 from scipy import ndimage
-import matplotlib
 
 image = ndimage.imread("C:\Users\Shtiliyan\Desktop\pytest\S005_001_00000003 - Copy - Copy.png", False, 'L')
 plt.imshow(image, interpolation='none', cmap='Greys_r')

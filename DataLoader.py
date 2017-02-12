@@ -1,69 +1,8 @@
-from scipy import ndimage
-import matplotlib.pyplot as plt
-import matplotlib
 import os
-
-photoCounter = 0
-
-matplotlib.rcParams.update({'font.size': 8})
-
-class Photo:
-    def __init__(self, name, data, landmarks, path):
-        self.name = name
-        self.data = data
-        self.landmarks = landmarks
-        self.path = path
-    
-    def loadData(self):
-        if self.data == None:
-            self.data = ndimage.imread(self.path, False, 'L')
-        
-    def unloadData(self):
-        self.data = None
-    
-    def show(self, showLandmarks = True):
-        self.loadData()
-        plt.imshow(self.data, interpolation='none', cmap='Greys_r')
-        for index in range(len(self.landmarks)):
-            landmark = self.landmarks[index]
-            ax = plt.gcf().gca()
-            circle = plt.Circle((landmark[0], landmark[1]), 1, color='red')
-            ax.add_artist(circle)
-            #text = plt.Text(x = landmark[0], y = landmark[1], text=index, color='red')
-            #ax.add_artist(text)
-        plt.show()
-
-class PhotoSession:
-    def __init__(self, name):
-        self.name = name
-        self.emotion = None
-        self.facs = None
-        self.photos = []
-        
-    def show(self):
-        for photo in self.photos:
-            photo.show()
-        
-    def loadSession(self):
-        for photo in self.photos:
-            photo.loadData()
-            
-    def unloadSession(self):
-        for photo in self.photos:
-            photo.unloadData()
-            
-    def getPeakPhoto(self):
-        return self.photos[len(self.photos) - 1]
-
-class FACSLabel:
-    def __init__(self, code, intensity):
-        self.code = code
-        self.intensity = intensity
-
-class Subject:
-    def __init__(self, name):
-        self.name = name
-        self.sessions = {}
+from Primitives.Photo import Photo
+from Primitives.PhotoSession import PhotoSession
+from Primitives.FACSLabel import FACSLabel
+from Primitives.Subject import Subject 
 
 class DataLoader:
     Images = "D:\Programming\Cohn-Kanade\cohn-kanade-images"
@@ -98,7 +37,6 @@ class DataLoader:
         return
        
     def loadPhotos(self, subject, session):
-        global photoCounter
         photoFolder = os.path.join(DataLoader.Images, subject, session)
         landmarkFolder = os.path.join(DataLoader.Landmarks, subject, session)
         for photo in os.listdir(photoFolder):
@@ -119,7 +57,6 @@ class DataLoader:
             f.close()
 
             photoPath = os.path.join(photoFolder, photo)
-            photoCounter = photoCounter+1
             oPhoto = Photo(photo, None, landmarks, photoPath)
             self.subjects[subject].sessions[session].photos.append(oPhoto)
         return
@@ -173,10 +110,3 @@ class DataLoader:
                 print "\t\t emotion: %s"%(repr(session.emotion))
                 print "\t\t facsCode: %s intensity: %s"%(session.facs.code, session.facs.intensity)
         return
-
-#dl = DataLoader()
-#dl.subjects["S045"].sessions["002"].getPeakPhoto().show()
-#dl.printData()
-#print(dl.subjects["S132"].sessions["003"].photos[3].landmarks)
-#dl.subjects["S132"].sessions["003"].show()
-
