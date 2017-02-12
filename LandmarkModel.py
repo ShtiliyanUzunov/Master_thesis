@@ -1,4 +1,4 @@
-class LandmarkLearner:
+class LandmarkModel:
     def __init__ (self):
         pass
     
