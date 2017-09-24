@@ -2,7 +2,7 @@ from Data import Data
 from sklearn.svm import LinearSVC
 #from sklearn.svm import NuSVC
 from sklearn.svm import SVC
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import sys
 
@@ -15,8 +15,8 @@ class EmotionModel:
         self._data = data
         
     def buildModel(self):
-        x = self._aggregateEmotionFeatureData()
-        y = self._aggregateEmotionClasses()
+        x = self._extractEmotionFeatureData()
+        y = self._extractEmotionClasses()
         
         #TODO: Is SVM the best model ?
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5)
@@ -45,15 +45,28 @@ class EmotionModel:
             plt.show()
             
         #showNormFeature(2)
+
+    def predict(self, session):
+        peakPhoto = session.getPeakPhoto()
+        flatLandmarks = []
+        for landmark in peakPhoto.landmarks:
+            flatLandmarks.append(landmark[0])
+            flatLandmarks.append(landmark[1])
+
+        flatLandmarks = [flatLandmarks]
+        flatLandmarks = self._normalizeFeatures(flatLandmarks)
+        return self._clf.predict(flatLandmarks)[0]
+
+    def getScores(self):
+        return {
+            "Train": self._trainScore,
+            "Test": self._testScore
+        }
     
-    def printScores(self):
-        print "Training: " + `self._trainScore`
-        print "Test: " + `self._testScore`
-    
-    def _aggregateEmotionFeatureData(self):
+    def _extractEmotionFeatureData(self):
         features = []
         
-        def aggregate(subject, session):
+        def extract(subject, session):
             oSession = self._data.subjects[subject].sessions[session]
             if oSession.emotion is not None:
                 peakPhoto = oSession.getPeakPhoto()
@@ -63,19 +76,19 @@ class EmotionModel:
                     flatLandmarks.append(landmark[1])
                 features.append(flatLandmarks)
     
-        self._data.visitAllSessions(aggregate)
+        self._data.visitAllSessions(extract)
     
         return self._normalizeFeatures(features)
 
-    def _aggregateEmotionClasses(self):
+    def _extractEmotionClasses(self):
         labels = []
         
-        def aggregate(subject, session):
+        def extract(subject, session):
             oSession = self._data.subjects[subject].sessions[session]
             if oSession.emotion is not None:
                 labels.append(oSession.emotion)
         
-        self._data.visitAllSessions(aggregate)
+        self._data.visitAllSessions(extract)
         return labels
     
     #TODO: Is this the best normalization? 

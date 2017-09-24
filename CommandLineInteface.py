@@ -4,6 +4,9 @@ Created on Sep 24, 2017
 @author: Shtiliyan
 '''
 
+from EmotionMap import EmotionMap
+from dask.array.learn import predict
+
 class CommandLineInterface:
         
     def __init__(self, data, emotionModel):
@@ -16,7 +19,7 @@ class CommandLineInterface:
         print ""
         print "Input options"
         for x in self.commandNames.keys():
-            print " - " + x
+            print " - " + x + " - " + self.commandNames[x]["description"]
         
     def start(self):
         self.printMenu()
@@ -56,7 +59,9 @@ class CommandLineInterface:
         return False
     
     def executePrintScores(self, inp):
-        self._emotionModel.printScores()
+        scores = self._emotionModel.getScores()
+        print "Train " + str(scores["Train"])
+        print "Test " + str(scores["Test"])
 
     def executeExit(self, inp):
         exit()
@@ -94,9 +99,12 @@ class CommandLineInterface:
         subjName = inp[1][inp[1].index("=") + 1 : ]
         if self._subjNotFound(subjName):
             return
-        
-        for sessionKey in self._data.subjects[subjName].sessions:
-            print sessionKey
+
+        for sessionName in self._data.subjects[subjName].sessions:
+            session = self._data.subjects[subjName].sessions[sessionName]
+            print "\t" + sessionName
+            print "\t\t emotion: %s, %s" % (str(session.emotion), EmotionMap[str(session.emotion)])
+            print "\t\t facsCode: %s intensity: %s" % (session.facs.code, session.facs.intensity)
             
     def executeGetEmotion(self, inp):
         if (len(inp) != 3 or
@@ -113,8 +121,8 @@ class CommandLineInterface:
             return
         
         print self._data.subjects[subjName].sessions[sessionName].emotion
-        
-    def executePredictEmotion(self, inp):    
+
+    def executePredictEmotion(self, inp):
         if (len(inp) != 3 or
             not inp[1].startswith("-subj=") or
             not inp[2].startswith("-sess=")):
@@ -127,32 +135,78 @@ class CommandLineInterface:
         if (self._subjNotFound(subjName) or 
             self._sessionNotFound(subjName, sessionName)):
             return
+
+        session = self._data.subjects[subjName].sessions[sessionName]
+        emotionNumber =  str(self._emotionModel.predict(session))
+        print "Predicted emotion: " + emotionNumber + " " + EmotionMap[emotionNumber]
+
+    def executeShowPeak(self, inp):
+        if (len(inp) != 3 or
+            not inp[1].startswith("-subj=") or
+            not inp[2].startswith("-sess=")):
+            self.printInvalidCommandUsage("showpeak -subj=<subject name> -sess=<session>")
+            return
         
-        print self._data.subjects[subjName].sessions[sessionName].emotion
-CommandLineInterface.commandNames = {
-        "showscores": {
-            "execute": CommandLineInterface.executePrintScores
-        },
-        "exit": {
-            "execute": CommandLineInterface.executeExit
-        },
-        "listsubjects": {
-            "execute": CommandLineInterface.executeListSubjects
-        },
-        "listsessions": {
-            "execute": CommandLineInterface.executeListSessions
-        },
-        "help": {
-            "execute": CommandLineInterface.executeHelp
-        },
-        "getemotion": {
-            "execute": CommandLineInterface.executeGetEmotion
-        },
-        "predictemotion": {
-            "execute": CommandLineInterface.executePredictEmotion
-        },
-        "showsession": {
-            "execute": CommandLineInterface.executeShowSession
-        }
-    }
+        subjName = inp[1][inp[1].index("=") + 1 : ]
+        sessionName = inp[2][inp[2].index("=") + 1 : ]
+        
+        if (self._subjNotFound(subjName) or 
+            self._sessionNotFound(subjName, sessionName)):
+            return
+        
+        session = self._data.subjects[subjName].sessions[sessionName]
+        session.getPeakPhoto().show()
     
+    def executeListFalsePredictions(self, inp):
+        def predictSession(subject, session):
+            oSession = self._data.subjects[subject].sessions[session]
+            actualEmotion = oSession.emotion
+            predictedEmotion = self._emotionModel.predict(oSession)
+            
+            if (actualEmotion != predictedEmotion) and (actualEmotion is not None):
+                print "Prediction difference: " + subject + " " + session
+        
+        self._data.visitAllSessions(predictSession)
+
+CommandLineInterface.commandNames = {
+    "printScores": {
+        "execute": CommandLineInterface.executePrintScores,
+        "description": "Prints the scores of the emotion model after the training"
+    },
+    "exit": {
+        "execute": CommandLineInterface.executeExit,
+        "description": "Exits the application"
+    },
+    "listSubjects": {
+        "execute": CommandLineInterface.executeListSubjects,
+        "description": "Lists all subjects in the data set"
+    },
+    "listSessions": {
+        "execute": CommandLineInterface.executeListSessions,
+        "description": "Lists all sessions for the given subject"
+    },
+    "help": {
+        "execute": CommandLineInterface.executeHelp,
+        "description": "Lists all available commands"
+    },
+    "getEmotion": {
+        "execute": CommandLineInterface.executeGetEmotion,
+        "description": "Prints the emotion for a given session as described in the dataset"
+    },
+    "predictEmotion": {
+        "execute": CommandLineInterface.executePredictEmotion,
+        "description": "Predicts the emotion of the session using the computed emotion model"
+    },
+    "showSession": {
+        "execute": CommandLineInterface.executeShowSession,
+        "description": "Shows a sequence of images for the given session"
+    },
+    "showPeak": {
+        "execute": CommandLineInterface.executeShowPeak,
+        "description": "Shows the peak image in a given session"
+    }, 
+    "listFalsePredictions": {
+        "execute": CommandLineInterface.executeListFalsePredictions,
+        "description": "Lists all the false positive sessions of the model"
+    }
+}
