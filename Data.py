@@ -1,8 +1,8 @@
 import os
-from Primitives.Photo import Photo
-from Primitives.PhotoSession import PhotoSession
-from Primitives.FACSLabel import FACSLabel
-from Primitives.Subject import Subject 
+from DataModel.Photo import Photo
+from DataModel.PhotoSession import PhotoSession
+from DataModel.FACSLabel import FACSLabel
+from DataModel.Subject import Subject
 import ConfigParser
 
 cp = ConfigParser.ConfigParser()
