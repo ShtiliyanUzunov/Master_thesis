@@ -5,7 +5,7 @@ from CommandLineInteface import CommandLineInterface
 
 
 
-matplotlib.rcParams.update({'font.size': 8})
+#matplotlib.rcParams.update({'font.size': 8})
 
 print "Loading data..."
 data = Data()
