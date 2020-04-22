@@ -17,17 +17,17 @@ from menpo.visualize import print_progress
 #plt.gca().set_title('Reconstructed shape');
 
 ar = np.ndarray(shape=(10,2), dtype=float)
-print ar
+print(ar)
 pc = menpo.shape.PointCloud(ar)
 
-print "Dimensions " + str(pc.n_dims)
-print "Points count " + str(pc.n_points)
-print "Parameters " + str(pc.n_parameters)
-print "Has landmarks " + str(pc.has_landmarks)
+print("Dimensions " + str(pc.n_dims))
+print("Points count " + str(pc.n_points))
+print("Parameters " + str(pc.n_parameters))
+print("Has landmarks " + str(pc.has_landmarks))
 
 for lt in print_progress(pc):
-    print lt
+    print(lt)
     
 opdm = menpofit.modelinstance.OrthoPDM(pc)
-print opdm.n_points
-print opdm.n_active_components
+print(opdm.n_points)
+print(opdm.n_active_components)

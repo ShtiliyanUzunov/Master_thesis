@@ -1,4 +1,4 @@
-from Data import Data
+from .Data import Data
 from sklearn.svm import LinearSVC
 #from sklearn.svm import NuSVC
 from sklearn.svm import SVC
@@ -32,13 +32,13 @@ class EmotionModel:
 
         #TODO: Refactor this
         def showNormFeature (index):
-            print len(x)
+            print(len(x))
             x1 = x[index][0::2]
             y1 = x[index][1::2]
-            print max(x1)
-            print min(x1)
-            print max(y1)
-            print min(y1)
+            print(max(x1))
+            print(min(x1))
+            print(max(y1))
+            print(min(y1))
             
             plt.scatter(x1,y1)
             plt.gca().invert_yaxis()
@@ -94,8 +94,8 @@ class EmotionModel:
     #TODO: Is this the best normalization? 
     def _normalizeFeatures(self, features):
         for feature in features:
-            lowestX = sys.maxint
-            lowestY = sys.maxint
+            lowestX = sys.maxsize
+            lowestY = sys.maxsize
             highestX = 0
             highestY = 0
             for x in feature[0::2]:

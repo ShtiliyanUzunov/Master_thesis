@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from scipy import ndimage
 
-image = ndimage.imread("C:\Users\Shtiliyan\Desktop\pytest\S052_002_00000015.png", False, 'L')
+image = ndimage.imread("C:\\Users\Shtiliyan\Desktop\pytest\S052_002_00000015.png", False, 'L')
 plt.imshow(image, interpolation='none', cmap='Greys_r')
 circle1 = plt.Circle((100, 100), 5, color='r')
 circle2 = plt.Circle((0.5, 0.5), 0.2, color='blue')
@@ -17,4 +17,4 @@ ax.add_artist(circle2)
 ax.add_artist(circle3)
 
 plt.show()
-print image
+print(image)

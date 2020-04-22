@@ -4,7 +4,7 @@ Created on Sep 24, 2017
 @author: Shtiliyan
 '''
 
-from EmotionMap import EmotionMap
+from .EmotionMap import EmotionMap
 from dask.array.learn import predict
 
 class CommandLineInterface:
@@ -16,17 +16,17 @@ class CommandLineInterface:
         pass
 
     def printMenu(self):
-        print ""
-        print "Input options"
-        for x in self.commandNames.keys():
-            print " - " + x + " - " + self.commandNames[x]["description"]
+        print("")
+        print("Input options")
+        for x in list(self.commandNames.keys()):
+            print(" - " + x + " - " + self.commandNames[x]["description"])
         
     def start(self):
         self.printMenu()
         self.listenForCommand()
         
     def listenForCommand(self):
-        inp = raw_input("")
+        inp = input("")
         self.processCommand(inp)
         
     def processCommand(self, inp):
@@ -34,7 +34,7 @@ class CommandLineInterface:
         
         if not inp[0] in self.commandNames:
             if len(inp[0]) > 0:
-                print "Command not found"
+                print("Command not found")
             self.listenForCommand()
             return
         
@@ -42,35 +42,35 @@ class CommandLineInterface:
         self.listenForCommand()
     
     def printInvalidCommandUsage(self, syntax):
-            print "Invalid command usage"
-            print "Correct syntax:"
-            print syntax
+            print("Invalid command usage")
+            print("Correct syntax:")
+            print(syntax)
         
     def _subjNotFound(self, subjName):
         if subjName not in self._data.subjects:
-            print "Subject not found"
+            print("Subject not found")
             return True
         return False
     
     def _sessionNotFound(self, subjName, sessionName):
         if sessionName not in self._data.subjects[subjName].sessions:
-            print "Session not found"
+            print("Session not found")
             return True
         return False
     
     def executePrintScores(self, inp):
         scores = self._emotionModel.getScores()
-        print "Train " + str(scores["Train"])
-        print "Test " + str(scores["Test"])
+        print("Train " + str(scores["Train"]))
+        print("Test " + str(scores["Test"]))
 
     def executeExit(self, inp):
         exit()
     
     def executeListSubjects(self, inp):
         for subject in self._data.subjects:
-            print subject
+            print(subject)
         
-        print "Total subjects count:" + str(len(self._data.subjects.keys()))
+        print("Total subjects count:" + str(len(list(self._data.subjects.keys()))))
     
     def executeHelp(self, inp):
         self.printMenu()
@@ -102,9 +102,9 @@ class CommandLineInterface:
 
         for sessionName in self._data.subjects[subjName].sessions:
             session = self._data.subjects[subjName].sessions[sessionName]
-            print "\t" + sessionName
-            print "\t\t emotion: %s, %s" % (str(session.emotion), EmotionMap[str(session.emotion)])
-            print "\t\t facsCode: %s intensity: %s" % (session.facs.code, session.facs.intensity)
+            print("\t" + sessionName)
+            print("\t\t emotion: %s, %s" % (str(session.emotion), EmotionMap[str(session.emotion)]))
+            print("\t\t facsCode: %s intensity: %s" % (session.facs.code, session.facs.intensity))
             
     def executeGetEmotion(self, inp):
         if (len(inp) != 3 or
@@ -120,7 +120,7 @@ class CommandLineInterface:
             self._sessionNotFound(subjName, sessionName)):
             return
         
-        print self._data.subjects[subjName].sessions[sessionName].emotion
+        print(self._data.subjects[subjName].sessions[sessionName].emotion)
 
     def executePredictEmotion(self, inp):
         if (len(inp) != 3 or
@@ -138,7 +138,7 @@ class CommandLineInterface:
 
         session = self._data.subjects[subjName].sessions[sessionName]
         emotionNumber =  str(self._emotionModel.predict(session))
-        print "Predicted emotion: " + emotionNumber + " " + EmotionMap[emotionNumber]
+        print("Predicted emotion: " + emotionNumber + " " + EmotionMap[emotionNumber])
 
     def executeShowPeak(self, inp):
         if (len(inp) != 3 or
@@ -164,7 +164,7 @@ class CommandLineInterface:
             predictedEmotion = self._emotionModel.predict(oSession)
             
             if (actualEmotion != predictedEmotion) and (actualEmotion is not None):
-                print "Prediction difference: " + subject + " " + session
+                print("Prediction difference: " + subject + " " + session)
         
         self._data.visitAllSessions(predictSession)
 

@@ -60,9 +60,9 @@ class PrepareLandmarkTrainingData:
         trainImagePaths = {}
         
         for i in range(0, self._numberOfImages):
-            imgsLen = len(allImagePaths.items())
+            imgsLen = len(list(allImagePaths.items()))
             randomImgIndex = random.randint(0, imgsLen - 1)
-            randomImgName = allImagePaths.items()[randomImgIndex][0]
+            randomImgName = list(allImagePaths.items())[randomImgIndex][0]
             
             trainImagePaths[randomImgName] = allImagePaths[randomImgName]
             del allImagePaths[randomImgName]

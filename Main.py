@@ -1,28 +1,28 @@
-import matplotlib
-import ConfigParser
+import configparser
 import os
 
-from Data import Data
+import matplotlib
+from pth3.CommandLineInteface import CommandLineInterface
+from pth3.Data import Data
+
 from EmotionModel import EmotionModel
-from CommandLineInteface import CommandLineInterface
 from PrepareLandmarkTrainingData import PrepareLandmarkTrainingData
 
-
-cp = ConfigParser.ConfigParser()
+cp = configparser.ConfigParser()
 cp.read(os.path.join(os.path.dirname(__file__), "Config.ini"))
 
 trainingPath = cp.get("ImagePaths", "TrainingPath")
 trainingImages = 1000
 #matplotlib.rcParams.update({'font.size': 8})
 
-print "Loading data..."
+print("Loading data...")
 data = Data()
 
-print "Preparing traing data..."
+print("Preparing traing data...")
 #prepareLandmarkTrainingData = PrepareLandmarkTrainingData(data, trainingImages, trainingPath)
 #prepareLandmarkTrainingData.prepare()
 
-print "Creating emotion model..."
+print("Creating emotion model...")
 emotionModel = EmotionModel(data)
 
 cli = CommandLineInterface(data, emotionModel)

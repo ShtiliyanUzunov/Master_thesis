@@ -1,11 +1,13 @@
+import configparser
 import os
-from DataModel.Photo import Photo
-from DataModel.PhotoSession import PhotoSession
-from DataModel.FACSLabel import FACSLabel
-from DataModel.Subject import Subject
-import ConfigParser
 
-cp = ConfigParser.ConfigParser()
+from pth3.DataModel.FACSLabel import FACSLabel
+from pth3.DataModel.PhotoSession import PhotoSession
+from pth3.DataModel.Subject import Subject
+
+from DataModel.Photo import Photo
+
+cp = configparser.ConfigParser()
 cp.read(os.path.join(os.path.dirname(__file__), "Config.ini"))
 
 class Data:
@@ -106,11 +108,11 @@ class Data:
     #For debug purposes, and to get an idea of how the data looks loaded in memory
     def printData(self):
         for subjectName in self.subjects:
-            print subjectName
+            print(subjectName)
             sessions = self.subjects[subjectName].sessions
             for sessionName in sessions:
                 session = sessions[sessionName]
-                print "\t" + sessionName
-                print "\t\t emotion: %s"%(repr(session.emotion))
-                print "\t\t facsCode: %s intensity: %s"%(session.facs.code, session.facs.intensity)
+                print("\t" + sessionName)
+                print("\t\t emotion: %s"%(repr(session.emotion)))
+                print("\t\t facsCode: %s intensity: %s"%(session.facs.code, session.facs.intensity))
         return
