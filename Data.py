@@ -1,9 +1,9 @@
 import configparser
 import os
 
-from pth3.DataModel.FACSLabel import FACSLabel
-from pth3.DataModel.PhotoSession import PhotoSession
-from pth3.DataModel.Subject import Subject
+from DataModel.FACSLabel import FACSLabel
+from DataModel.PhotoSession import PhotoSession
+from DataModel.Subject import Subject
 
 from DataModel.Photo import Photo
 

@@ -2,8 +2,8 @@ import configparser
 import os
 
 import matplotlib
-from pth3.CommandLineInteface import CommandLineInterface
-from pth3.Data import Data
+from CommandLineInteface import CommandLineInterface
+from Data import Data
 
 from EmotionModel import EmotionModel
 from PrepareLandmarkTrainingData import PrepareLandmarkTrainingData
