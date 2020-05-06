@@ -2,10 +2,9 @@ import configparser
 import os
 
 from DataModel.FACSLabel import FACSLabel
+from DataModel.Photo import Photo
 from DataModel.PhotoSession import PhotoSession
 from DataModel.Subject import Subject
-
-from DataModel.Photo import Photo
 
 cp = configparser.ConfigParser()
 cp.read(os.path.join(os.path.dirname(__file__), "Config.ini"))

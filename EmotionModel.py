@@ -1,6 +1,3 @@
-from .Data import Data
-from sklearn.svm import LinearSVC
-#from sklearn.svm import NuSVC
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
@@ -10,17 +7,14 @@ class EmotionModel:
     def __init__(self, data):
         self._data = data
         self.buildModel()
-        
-    def setData(self, data):
-        self._data = data
-        
+
+
     def buildModel(self):
-        x = self._extractEmotionFeatureData()
-        y = self._extractEmotionClasses()
-        
-        #TODO: Is SVM the best model ?
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.5)
-        
+        x, y = self._extractEmotionFeatureData()
+
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+
+        #TODO: Hyperparameter tuning
         self._clf = SVC(kernel='linear')
         self._clf.fit(x_train, y_train)
         
@@ -29,6 +23,7 @@ class EmotionModel:
 
         self._trainScore = self._clf.score(x_train, y_train)
         self._testScore = self._clf.score(x_test, y_test)
+        print("Training score {}. Test score {}.".format(self._trainScore, self._testScore))
 
         #TODO: Refactor this
         def showNormFeature (index):
@@ -48,14 +43,17 @@ class EmotionModel:
 
     def predict(self, session):
         peakPhoto = session.getPeakPhoto()
-        flatLandmarks = []
-        for landmark in peakPhoto.landmarks:
-            flatLandmarks.append(landmark[0])
-            flatLandmarks.append(landmark[1])
+        return self.predict_by_landmarks(peakPhoto.landmarks)
 
-        flatLandmarks = [flatLandmarks]
-        flatLandmarks = self._normalizeFeatures(flatLandmarks)
-        return self._clf.predict(flatLandmarks)[0]
+    def predict_by_landmarks(self, landmarks):
+        flat_landmarks = []
+        for landmark in landmarks:
+            flat_landmarks.append(landmark[0])
+            flat_landmarks.append(landmark[1])
+
+        flat_landmarks = [flat_landmarks]
+        flat_landmarks = self._normalizeFeatures(flat_landmarks)
+        return self._clf.predict(flat_landmarks)[0]
 
     def getScores(self):
         return {
@@ -65,31 +63,23 @@ class EmotionModel:
     
     def _extractEmotionFeatureData(self):
         features = []
+        emotionLabels = []
         
         def extract(subject, session):
             oSession = self._data.subjects[subject].sessions[session]
             if oSession.emotion is not None:
-                peakPhoto = oSession.getPeakPhoto()
-                flatLandmarks = []
-                for landmark in peakPhoto.landmarks:
-                    flatLandmarks.append(landmark[0])
-                    flatLandmarks.append(landmark[1])
-                features.append(flatLandmarks)
+                last_n_photos = oSession.get_last_n_photos(2)
+                for peakPhoto in last_n_photos:
+                    flatLandmarks = []
+                    for landmark in peakPhoto.landmarks:
+                        flatLandmarks.append(landmark[0])
+                        flatLandmarks.append(landmark[1])
+                    emotionLabels.append(oSession.emotion)
+                    features.append(flatLandmarks)
     
         self._data.visitAllSessions(extract)
     
-        return self._normalizeFeatures(features)
-
-    def _extractEmotionClasses(self):
-        labels = []
-        
-        def extract(subject, session):
-            oSession = self._data.subjects[subject].sessions[session]
-            if oSession.emotion is not None:
-                labels.append(oSession.emotion)
-        
-        self._data.visitAllSessions(extract)
-        return labels
+        return self._normalizeFeatures(features), emotionLabels
     
     #TODO: Is this the best normalization? 
     def _normalizeFeatures(self, features):

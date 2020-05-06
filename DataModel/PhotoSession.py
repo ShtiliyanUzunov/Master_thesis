@@ -19,3 +19,6 @@ class PhotoSession:
             
     def getPeakPhoto(self):
         return self.photos[len(self.photos) - 1]
+
+    def get_last_n_photos(self, n):
+        return self.photos[len(self.photos) - n:]

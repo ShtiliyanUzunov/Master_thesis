@@ -4,8 +4,7 @@ Created on Sep 24, 2017
 @author: Shtiliyan
 '''
 
-from .EmotionMap import EmotionMap
-from dask.array.learn import predict
+from EmotionMap import EmotionMap
 
 class CommandLineInterface:
         

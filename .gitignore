@@ -1,3 +1,5 @@
 *.pyc
 Config.ini
+model.h5
+model_landmarks.h5
 .idea

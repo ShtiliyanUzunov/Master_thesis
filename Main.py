@@ -1,19 +1,16 @@
 import configparser
 import os
 
-import matplotlib
 from CommandLineInteface import CommandLineInterface
 from Data import Data
-
 from EmotionModel import EmotionModel
-from PrepareLandmarkTrainingData import PrepareLandmarkTrainingData
+
 
 cp = configparser.ConfigParser()
 cp.read(os.path.join(os.path.dirname(__file__), "Config.ini"))
 
 trainingPath = cp.get("ImagePaths", "TrainingPath")
 trainingImages = 1000
-#matplotlib.rcParams.update({'font.size': 8})
 
 print("Loading data...")
 data = Data()
