@@ -2,22 +2,14 @@ import configparser
 import os
 
 from CommandLineInteface import CommandLineInterface
-from Data import Data
+from DataLoader import DataLoader
 from EmotionModel import EmotionModel
 
-
 cp = configparser.ConfigParser()
-cp.read(os.path.join(os.path.dirname(__file__), "Config.ini"))
+cp.read(os.path.join(os.path.dirname(__file__), "resources/Config.ini"))
 
-trainingPath = cp.get("ImagePaths", "TrainingPath")
-trainingImages = 1000
 
-print("Loading data...")
-data = Data()
-
-print("Preparing traing data...")
-#prepareLandmarkTrainingData = PrepareLandmarkTrainingData(data, trainingImages, trainingPath)
-#prepareLandmarkTrainingData.prepare()
+data = DataLoader()
 
 print("Creating emotion model...")
 emotionModel = EmotionModel(data)

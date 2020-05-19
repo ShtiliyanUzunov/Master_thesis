@@ -4,7 +4,7 @@ Created on Sep 24, 2017
 @author: Shtiliyan
 '''
 
-from EmotionMap import EmotionMap
+from data_model.emotion_map import emotion_map
 
 class CommandLineInterface:
         
@@ -12,7 +12,7 @@ class CommandLineInterface:
         self._data = data
         self._emotionModel = emotionModel
         self._history = []
-        pass
+
 
     def printMenu(self):
         print("")
@@ -102,7 +102,7 @@ class CommandLineInterface:
         for sessionName in self._data.subjects[subjName].sessions:
             session = self._data.subjects[subjName].sessions[sessionName]
             print("\t" + sessionName)
-            print("\t\t emotion: %s, %s" % (str(session.emotion), EmotionMap[str(session.emotion)]))
+            print("\t\t emotion: %s, %s" % (str(session.emotion), emotion_map[str(session.emotion)]))
             print("\t\t facsCode: %s intensity: %s" % (session.facs.code, session.facs.intensity))
             
     def executeGetEmotion(self, inp):
@@ -137,7 +137,7 @@ class CommandLineInterface:
 
         session = self._data.subjects[subjName].sessions[sessionName]
         emotionNumber =  str(self._emotionModel.predict(session))
-        print("Predicted emotion: " + emotionNumber + " " + EmotionMap[emotionNumber])
+        print("Predicted emotion: " + emotionNumber + " " + emotion_map[emotionNumber])
 
     def executeShowPeak(self, inp):
         if (len(inp) != 3 or
@@ -165,7 +165,7 @@ class CommandLineInterface:
             if (actualEmotion != predictedEmotion) and (actualEmotion is not None):
                 print("Prediction difference: " + subject + " " + session)
         
-        self._data.visitAllSessions(predictSession)
+        self._data.visit_all_sessions(predictSession)
 
 CommandLineInterface.commandNames = {
     "printScores": {

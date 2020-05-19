@@ -1,29 +1,30 @@
 import configparser
 import os
 
-from DataModel.FACSLabel import FACSLabel
-from DataModel.Photo import Photo
-from DataModel.PhotoSession import PhotoSession
-from DataModel.Subject import Subject
+from data_model.FACS_label import FACS_label
+from data_model.photo import Photo
+from data_model.photo_session import PhotoSession
+from data_model.subject import Subject
 
 cp = configparser.ConfigParser()
-cp.read(os.path.join(os.path.dirname(__file__), "Config.ini"))
+cp.read(os.path.join(os.path.dirname(__file__), "resources/Config.ini"))
 
-class Data:
+class DataLoader:
     Images = cp.get("ImagePaths", "Images")
     FACS = cp.get("ImagePaths", "FACS")
     Landmarks = cp.get("ImagePaths", "Landmarks")
     Emotions =  cp.get("ImagePaths", "Emotions")
     
     def __init__(self):
-        self.loadSubjects()
-        self.visitAllSessions(self.loadPhotos)
-        self.visitAllSessions(self.loadFACS)
-        self.visitAllSessions(self.loadEmotions)
+        print("Loading data...")
+        self._load_subjects()
+        self.visit_all_sessions(self._load_photos)
+        self.visit_all_sessions(self._load_FACS)
+        self.visit_all_sessions(self._load_emotions)
     
-    def loadSubjects(self):
+    def _load_subjects(self):
         self.subjects = {}
-        directory = Data.Images
+        directory = DataLoader.Images
         
         subjects = os.listdir(directory)
         for name in subjects:
@@ -41,15 +42,15 @@ class Data:
                 oSubject.sessions[sessionName] = PhotoSession(sessionName)
         return
 
-    def visitAllSessions(self, callback):
+    def visit_all_sessions(self, callback):
         for subject in self.subjects:
             sessions = self.subjects[subject].sessions
             for session in sessions:
                 callback(subject, session)
        
-    def loadPhotos(self, subject, session):
-        photoFolder = os.path.join(Data.Images, subject, session)
-        landmarkFolder = os.path.join(Data.Landmarks, subject, session)
+    def _load_photos(self, subject, session):
+        photoFolder = os.path.join(DataLoader.Images, subject, session)
+        landmarkFolder = os.path.join(DataLoader.Landmarks, subject, session)
         for photo in os.listdir(photoFolder):
             if photo.endswith(".DS_Store"):
                 continue
@@ -72,8 +73,8 @@ class Data:
             self.subjects[subject].sessions[session].photos.append(oPhoto)
         return
       
-    def loadFACS(self, subject, session):
-        sessionPath = os.path.join(Data.FACS, subject, session)
+    def _load_FACS(self, subject, session):
+        sessionPath = os.path.join(DataLoader.FACS, subject, session)
         facsList = os.listdir(sessionPath)
         for listItem in facsList:
             facsLiPath = os.path.join(sessionPath, listItem)
@@ -83,14 +84,13 @@ class Data:
                 if line == "\n":
                     continue
                 facs = line.strip().split("   ")
-                self.subjects[subject].sessions[session].facs = FACSLabel(float(facs[0]), float(facs[1]))
+                self.subjects[subject].sessions[session].facs = FACS_label(float(facs[0]), float(facs[1]))
             f.close()
         return
-     
-    #TODO: Maybe emotion should equal -1 when we don't have any data ?       
-    def loadEmotions(self, subject, session):
+
+    def _load_emotions(self, subject, session):
         sessions = self.subjects[subject].sessions
-        emotionFolder = os.path.join(Data.Emotions, subject, session)
+        emotionFolder = os.path.join(DataLoader.Emotions, subject, session)
         if not os.path.exists(emotionFolder):
             sessions[session].emotion = None
             return
@@ -105,7 +105,7 @@ class Data:
         f.close()
     
     #For debug purposes, and to get an idea of how the data looks loaded in memory
-    def printData(self):
+    def _print_data(self):
         for subjectName in self.subjects:
             print(subjectName)
             sessions = self.subjects[subjectName].sessions

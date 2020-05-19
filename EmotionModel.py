@@ -77,7 +77,7 @@ class EmotionModel:
                     emotionLabels.append(oSession.emotion)
                     features.append(flatLandmarks)
     
-        self._data.visitAllSessions(extract)
+        self._data.visit_all_sessions(extract)
     
         return self._normalizeFeatures(features), emotionLabels
     

@@ -1,6 +1,4 @@
-#(i.e. 0=neutral, 1=anger, 2=contempt, 3=disgust, 4=fear, 5=happy, 6=sadness, 7=surprise)
-
-EmotionMap = {
+emotion_map = {
     "None": "None",
     "0.0": "Neutral",
     "1.0": "Anger",
