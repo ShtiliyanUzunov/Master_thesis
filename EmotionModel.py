@@ -14,7 +14,6 @@ class EmotionModel:
 
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
-        #TODO: Hyperparameter tuning
         self._clf = SVC(kernel='linear')
         self._clf.fit(x_train, y_train)
         
@@ -80,8 +79,8 @@ class EmotionModel:
         self._data.visit_all_sessions(extract)
     
         return self._normalizeFeatures(features), emotionLabels
-    
-    #TODO: Is this the best normalization? 
+
+
     def _normalizeFeatures(self, features):
         for feature in features:
             lowestX = sys.maxsize
