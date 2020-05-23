@@ -44,7 +44,7 @@ def get_model():
         loss='categorical_crossentropy'
     )
 
-    plot_model(model, to_file=MODEL_NAME + ".png", show_shapes=True, expand_nested=True)
+    plot_model(model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
 
     return model
 
@@ -86,7 +86,7 @@ def _test_model_on_single_photo(model, data):
 
 def _load_data_and_model():
     data = DataLoader()
-    model = load_model(MODEL_NAME + '.h5')
+    model = load_model("models_resources\\{}.h5".format(MODEL_NAME))
     return data, model
 
 def _manual_test():
@@ -108,6 +108,12 @@ def _evaluation_test():
     plt.imshow(conf_mat)
     plt.show()
 
+def _plot_model():
+    _, model = _load_data_and_model()
+    plot_model(model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
+
 if __name__ == "__main__":
     #_manual_test()
-    _evaluation_test()
+    #_evaluation_test()
+    #_plot_model()
+    pass

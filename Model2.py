@@ -42,8 +42,6 @@ def get_model():
         loss='mean_squared_error'
     )
 
-    plot_model(model, to_file=MODEL_NAME + ".png", show_shapes=True, expand_nested=True)
-
     return model
 
 def _preprocess_data_for_landmarks(data):
@@ -89,7 +87,7 @@ def test_on_landmakrs_on_single_photo(landmark_model, emotion_model, data):
 
 def _load_data_and_model():
     data = DataLoader()
-    landmark_model = load_model(MODEL_NAME + '.h5')
+    landmark_model = load_model("models_resources\\{}.h5".format(MODEL_NAME))
     emotion_model = EmotionModel(data)
     return data, landmark_model, emotion_model
 
@@ -107,6 +105,12 @@ def _evaluation_test():
     mae = mean_absolute_error(y_test, pred)
     print("Mean absolute error: {}".format(mae))
 
+def _plot_model():
+    _, landmark_model, _ = _load_data_and_model()
+    plot_model(landmark_model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
+
 if __name__ == "__main__":
     #_manual_test()
-    _evaluation_test()
+    #_evaluation_test()
+    #_plot_model()
+    pass
