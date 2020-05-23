@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from DataLoader import DataLoader
 from ModelUtils import _crop_photo
 from ModelUtils import _get_random_peak_photo
+from ModelUtils import _train_model_common
 from constants import *
 from data_model.emotion_map import emotion_map
 
@@ -49,7 +50,6 @@ def get_model():
     return model
 
 def _preprocess_data(data):
-    global x_train, x_test, y_train, y_test
     x = []
     y = []
     for subj_name, subject in data.subjects.items():
@@ -112,8 +112,14 @@ def _plot_model():
     _, model = _load_data_and_model()
     plot_model(model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
 
+def _train_model():
+    data, _ = _load_data_and_model()
+    x_train, x_test, y_train, y_test = _preprocess_data(data)
+    _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
+
 if __name__ == "__main__":
     #_manual_test()
     #_evaluation_test()
+    _train_model()
     #_plot_model()
     pass

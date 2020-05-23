@@ -1,21 +1,25 @@
 import random
 
+import matplotlib.pyplot as plt
 import numpy as np
-from keras.models import Sequential
 from keras.layers import *
+from keras.models import Sequential
+from keras.models import load_model
 from keras.optimizers import Adam
 from keras.utils import plot_model
-from keras.models import load_model
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_absolute_error
-from DataLoader import DataLoader
+from sklearn.model_selection import train_test_split
 
+from DataLoader import DataLoader
+from EmotionModel import EmotionModel
+from ModelUtils import _crop_photo
+from ModelUtils import _get_random_peak_photo
+from ModelUtils import _train_model_common
+from constants import *
 from data_model.emotion_map import emotion_map
 from data_model.photo import Photo
-from ModelUtils import _get_random_peak_photo
-from ModelUtils import _crop_photo
-from constants import *
-from EmotionModel import EmotionModel
 
 MODEL_NAME = "model_landmarks"
 
@@ -44,8 +48,7 @@ def get_model():
 
     return model
 
-def _preprocess_data_for_landmarks(data):
-    global x_train, x_test, y_train, y_test
+def _preprocess_data(data):
     x = []
     y = []
     for subj_name, subject in data.subjects.items():
@@ -62,13 +65,17 @@ def _preprocess_data_for_landmarks(data):
                 # p.show()
 
                 x.append(np.array(crop_photo).reshape(DATA_RESOLUTION, DATA_RESOLUTION))
-                y.append(np.array(landmarks).flatten())
+                y.append(np.concatenate((np.array(landmarks).flatten(), [session.emotion])))
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TEST_SIZE, shuffle=True)
+    y_train_emotion = list(map(lambda n: n[136], y_train))
+    y_test_emotion = list(map(lambda n: n[136], y_test))
+    y_train = list(map(lambda n: n[0:136], y_train))
+    y_test = list(map(lambda n: n[0:136], y_test))
     print("Train size: {}".format(len(x_train)))
     print("Test size: {}".format(len(x_test)))
     print("Total size: {}".format(len(x)))
-    return x_train, x_test, y_train, y_test
+    return x_train, x_test, y_train, y_test, y_train_emotion, y_test_emotion
 
 
 def test_on_landmakrs_on_single_photo(landmark_model, emotion_model, data):
@@ -99,18 +106,35 @@ def _manual_test():
 
 def _evaluation_test():
     data, landmark_model, emotion_model = _load_data_and_model()
-    _, x_test, _, y_test = _preprocess_data_for_landmarks(data)
+    _, x_test, _, y_test, _, y_test_emotion = _preprocess_data(data)
 
-    pred = landmark_model.predict(np.array(x_test).reshape((len(x_test), DATA_RESOLUTION, DATA_RESOLUTION, 1)))
-    mae = mean_absolute_error(y_test, pred)
+    pred_lm = landmark_model.predict(np.array(x_test).reshape((len(x_test), DATA_RESOLUTION, DATA_RESOLUTION, 1)))
+    mae = mean_absolute_error(y_test, pred_lm)
     print("Mean absolute error: {}".format(mae))
+
+    pred_emotion = []
+    for lm in pred_lm:
+        pred_emotion.append(emotion_model.predict_by_landmarks(lm.reshape(68, 2)))
+
+    conf_mat = confusion_matrix(y_test_emotion, pred_emotion)
+    acc = accuracy_score(y_test_emotion, pred_emotion)
+    print("Accuracy: {}".format(acc))
+
+    plt.imshow(conf_mat)
+    plt.show()
 
 def _plot_model():
     _, landmark_model, _ = _load_data_and_model()
     plot_model(landmark_model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
 
+def _train_model():
+    data, _ = _load_data_and_model()
+    x_train, x_test, y_train, y_test = _preprocess_data(data)
+    _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
+
 if __name__ == "__main__":
     #_manual_test()
     #_evaluation_test()
+    #_train_model()
     #_plot_model()
     pass
