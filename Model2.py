@@ -2,6 +2,8 @@ import random
 
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
+import time
 from keras.layers import *
 from keras.models import Sequential
 from keras.models import load_model
@@ -132,9 +134,50 @@ def _train_model():
     x_train, x_test, y_train, y_test = _preprocess_data(data)
     _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
 
+def _camera_test():
+    _, model, _ = _load_data_and_model()
+    vid = cv2.VideoCapture(0)
+
+    while (True):
+
+        # Capture the video frame
+        # by frame
+        ret, frame = vid.read()
+
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        #gray_frame_croped = gray_frame[0:480, 80:560]
+        gray_frame_croped = gray_frame[60:420, 140:500]
+        gray_frame_resized = cv2.resize(gray_frame_croped, (DATA_RESOLUTION, DATA_RESOLUTION))
+        data = [gray_frame_resized]
+
+        pred = model.predict(np.array(data).reshape((len(data), DATA_RESOLUTION, DATA_RESOLUTION, 1)))
+        pred = pred.reshape(68, 2)
+
+        for t in pred:
+            cv2.circle(gray_frame_resized, tuple(t), 1, (255, 255, 255), 1)
+
+        cv2.line(frame, (80, 0), (80, 480), (255, 255, 255) , 1)
+        cv2.line(frame, (560, 0), (560, 480), (255, 255, 255), 1)
+
+        # Display the resulting frame
+        cv2.imshow('resized', gray_frame_resized)
+        cv2.imshow('frame', frame)
+
+        # the 'q' button is set as the
+        # quitting button you may use any
+        # desired button of your choice
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # After the loop release the cap object
+    vid.release()
+    # Destroy all the windows
+    cv2.destroyAllWindows()
+
 if __name__ == "__main__":
     #_manual_test()
     #_evaluation_test()
+    #_camera_test()
     #_train_model()
     #_plot_model()
     pass
