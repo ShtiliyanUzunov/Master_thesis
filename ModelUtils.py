@@ -36,11 +36,11 @@ def _crop_photo(photo):
     return dlib.resize_image(crop_img, DATA_RESOLUTION, DATA_RESOLUTION)
 
 
-def _train_model_common(model, model_name, x_train, x_test, y_train, y_test):
+def _train_model_common(model, model_name, epochs, x_train, x_test, y_train, y_test):
     print("Starting training")
 
     model.fit(np.array(x_train).reshape((len(x_train), DATA_RESOLUTION, DATA_RESOLUTION, 1)), np.array(y_train),
-              epochs=EPOCHS)
+              epochs=epochs)
     model.save("models_eval\\{}.h5".format(model_name), include_optimizer=False)
 
     ev = model.evaluate(np.array(x_test).reshape((len(x_test), DATA_RESOLUTION, DATA_RESOLUTION, 1)), np.array(y_test))

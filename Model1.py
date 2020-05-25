@@ -114,7 +114,7 @@ def _plot_model():
 def _train_model():
     data, _ = _load_data_and_model()
     x_train, x_test, y_train, y_test = _preprocess_data(data)
-    _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
+    _train_model_common(get_model(), MODEL_NAME, EPOCHS_MODEL_1, x_train, x_test, y_train, y_test)
 
 def _camera_test():
     _, model = _load_data_and_model()

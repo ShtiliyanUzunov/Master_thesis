@@ -194,7 +194,7 @@ def _train_model():
     with tf.device('/GPU:0'):
         data, _, _ = _load_data_and_model(True)
         x_train, x_test, y_train, y_test, _, _ = _preprocess_data(data)
-        _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
+        _train_model_common(get_model(), MODEL_NAME, EPOCHS_MODEL_2, x_train, x_test, y_train, y_test)
 
 def _camera_test():
     _, model, _ = _load_data_and_model()
