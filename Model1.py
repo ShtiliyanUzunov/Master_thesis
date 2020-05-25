@@ -20,7 +20,6 @@ from constants import *
 from data_model.emotion_map import emotion_map
 
 MODEL_NAME = "model"
-np.set_printoptions(precision=4, floatmode='fixed')
 
 def get_model():
     model = Sequential()
@@ -32,7 +31,6 @@ def get_model():
     model.add(Conv2D(64, kernel_size=5, activation='relu'))
     model.add(MaxPooling2D(pool_size=2))
     model.add(Flatten())
-
 
     model.add(Dense(units=2048, activation='relu'))
     model.add(Dropout(rate=0.25))
@@ -166,6 +164,6 @@ if __name__ == "__main__":
     #_manual_test()
     #_evaluation_test()
     #_camera_test()
-    #_train_model()
+    _train_model()
     #_plot_model()
     pass

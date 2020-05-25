@@ -13,6 +13,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
 
 from DataLoader import DataLoader
 from EmotionModel import EmotionModel
@@ -23,16 +26,29 @@ from constants import *
 from data_model.emotion_map import emotion_map
 from data_model.photo import Photo
 
+
+run_opts = tf.compat.v1.RunOptions(report_tensor_allocations_upon_oom = True)
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
+''''''
+tf.config.experimental.set_virtual_device_configuration(
+          physical_devices[0],
+          [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=3300)])
+
+
 MODEL_NAME = "model_landmarks"
 
 def get_model():
     model = Sequential()
 
-    model.add(Conv2D(258, kernel_size=8, activation='relu', input_shape=(DATA_RESOLUTION,DATA_RESOLUTION, 1)))
+    #model.add(Conv2D(258, kernel_size=8, activation='relu', input_shape=(DATA_RESOLUTION,DATA_RESOLUTION, 1)))
+    model.add(Conv2D(196, kernel_size=8, activation='relu', input_shape=(DATA_RESOLUTION, DATA_RESOLUTION, 1)))
     model.add(MaxPooling2D(pool_size=2))
-    model.add(Conv2D(384, kernel_size=5, activation='relu'))
+    #model.add(Conv2D(384, kernel_size=5, activation=
+    model.add(Conv2D(256, kernel_size=5, activation='relu'))
     model.add(MaxPooling2D(pool_size=2))
-    model.add(Conv2D(196, kernel_size=5, activation='relu'))
+    #model.add(Conv2D(196, kernel_size=5, activation='relu'))
+    model.add(Conv2D(128, kernel_size=5, activation='relu'))
     model.add(MaxPooling2D(pool_size=2))
     model.add(Flatten())
 
@@ -130,9 +146,10 @@ def _plot_model():
     plot_model(landmark_model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
 
 def _train_model():
-    data, _ = _load_data_and_model()
-    x_train, x_test, y_train, y_test = _preprocess_data(data)
-    _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
+    with tf.device('/CPU:0'):
+        data, _, _ = _load_data_and_model()
+        x_train, x_test, y_train, y_test, _, _ = _preprocess_data(data)
+        _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
 
 def _camera_test():
     _, model, _ = _load_data_and_model()
@@ -178,6 +195,6 @@ if __name__ == "__main__":
     #_manual_test()
     #_evaluation_test()
     #_camera_test()
-    #_train_model()
+    _train_model()
     #_plot_model()
     pass
