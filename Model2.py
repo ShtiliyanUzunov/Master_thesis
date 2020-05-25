@@ -16,6 +16,9 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
+import keras.backend as K
+import keras
+
 
 from DataLoader import DataLoader
 from EmotionModel import EmotionModel
@@ -27,44 +30,82 @@ from data_model.emotion_map import emotion_map
 from data_model.photo import Photo
 
 
-run_opts = tf.compat.v1.RunOptions(report_tensor_allocations_upon_oom = True)
 physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
-''''''
-tf.config.experimental.set_virtual_device_configuration(
-          physical_devices[0],
-          [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=3300)])
+
 
 
 MODEL_NAME = "model_landmarks"
 
+low_prio_indecies = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+normal_indecies = [18, 19, 20, 23, 24, 25, 27,28,29,30,31,32,33,34,35,
+                   37,38,40,41,43,44,46,47,50,51,52,55,56,57,58,59,60,61,62,63,64,65,66,67]
+high_prio_indecies = [17, 21, 22, 26, 36, 39, 42, 45, 48, 49, 53, 54]
+
+weight_lp = 1
+weight_normal = 2
+weight_hp = 4
+total_weight = len(low_prio_indecies) * weight_lp + \
+               len(normal_indecies) * weight_normal + \
+               len(high_prio_indecies) * weight_hp
+
 def get_model():
     model = Sequential()
 
-    #model.add(Conv2D(258, kernel_size=8, activation='relu', input_shape=(DATA_RESOLUTION,DATA_RESOLUTION, 1)))
-    model.add(Conv2D(196, kernel_size=8, activation='relu', input_shape=(DATA_RESOLUTION, DATA_RESOLUTION, 1)))
+    model.add(Conv2D(258, kernel_size=8, activation='relu', input_shape=(DATA_RESOLUTION,DATA_RESOLUTION, 1)))
     model.add(MaxPooling2D(pool_size=2))
-    #model.add(Conv2D(384, kernel_size=5, activation=
-    model.add(Conv2D(256, kernel_size=5, activation='relu'))
+    model.add(Conv2D(384, kernel_size=5, activation='relu'))
     model.add(MaxPooling2D(pool_size=2))
-    #model.add(Conv2D(196, kernel_size=5, activation='relu'))
-    model.add(Conv2D(128, kernel_size=5, activation='relu'))
+    model.add(Conv2D(196, kernel_size=5, activation='relu'))
     model.add(MaxPooling2D(pool_size=2))
     model.add(Flatten())
 
     model.add(Dense(units=2048, activation='relu'))
-    model.add(Dropout(rate=0.1))
+    #model.add(Dropout(rate=0.1))
     model.add(Dense(units=1024, activation='relu'))
-    model.add(Dropout(rate=0.1))
+    #model.add(Dropout(rate=0.1))
     model.add(Dense(units=136, activation='linear'))
 
     model.compile(
         optimizer=Adam(learning_rate=0.00001),
         metrics=['mae'],
-        loss='mean_squared_error'
+        #loss='mean_squared_error'
+        loss=_custom_loss
     )
 
     return model
+
+def _apply_weight_to_tensor(input, indecies, weight):
+    for i in indecies:
+        #x point
+        tf.multiply(input[i * 2], weight)
+        #y point
+        tf.multiply(input[(i * 2) + 1], weight)
+
+def _custom_metric(yTrue, yPred):
+    out = tf.Variable(0, dtype='float32')
+
+    for i in high_prio_indecies:
+        out.assign_add(tf.abs(yTrue[i * 2] - yPred[i * 2]))
+        out.assign_add(tf.abs(yTrue[(i * 2) + 1] - yPred[(i * 2) + 1]))
+
+    return out / (2 * len(high_prio_indecies))
+
+def _custom_loss(yTrue,yPred):
+    _apply_weight_to_tensor(yTrue, low_prio_indecies, weight_lp)
+    _apply_weight_to_tensor(yPred, low_prio_indecies, weight_lp)
+
+    _apply_weight_to_tensor(yTrue, normal_indecies, weight_normal)
+    _apply_weight_to_tensor(yPred, normal_indecies, weight_normal)
+
+    _apply_weight_to_tensor(yTrue, high_prio_indecies, weight_hp)
+    _apply_weight_to_tensor(yPred, high_prio_indecies, weight_hp)
+
+    yTrue = yTrue / total_weight
+    yPred = yPred / total_weight
+
+    return K.sum(K.square(yPred - yTrue))
+
 
 def _preprocess_data(data):
     x = []
@@ -74,7 +115,7 @@ def _preprocess_data(data):
             if session.emotion is None:
                 continue
 
-            photos = random.sample(session.photos, min(len(session.photos), PHOTOS_PER_SESSION))
+            photos = random.sample(session.photos, min(len(session.photos), PHOTOS_PER_SESSION_MODEL_2))
             #photos = session.get_last_n_photos(PHOTOS_PER_SESSION)
             for photo in photos:
                 crop_photo = _crop_photo(photo)
@@ -110,8 +151,12 @@ def test_on_landmakrs_on_single_photo(landmark_model, emotion_model, data):
     test_photo = Photo(None, crop_photo, predicted_landmarks, None)
     test_photo.show(overlap_landmarks=shrinked_landmarks)
 
-def _load_data_and_model():
+def _load_data_and_model(skip_model_load = False):
     data = DataLoader()
+
+    if skip_model_load:
+        return data, None, None
+
     landmark_model = load_model("models_resources\\{}.h5".format(MODEL_NAME))
     emotion_model = EmotionModel(data)
     return data, landmark_model, emotion_model
@@ -146,8 +191,8 @@ def _plot_model():
     plot_model(landmark_model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
 
 def _train_model():
-    with tf.device('/CPU:0'):
-        data, _, _ = _load_data_and_model()
+    with tf.device('/GPU:0'):
+        data, _, _ = _load_data_and_model(True)
         x_train, x_test, y_train, y_test, _, _ = _preprocess_data(data)
         _train_model_common(get_model(), MODEL_NAME, x_train, x_test, y_train, y_test)
 
@@ -193,8 +238,8 @@ def _camera_test():
 
 if __name__ == "__main__":
     #_manual_test()
-    #_evaluation_test()
+    _evaluation_test()
     #_camera_test()
-    _train_model()
+    #_train_model()
     #_plot_model()
     pass

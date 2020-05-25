@@ -56,7 +56,7 @@ def _preprocess_data(data):
             if session.emotion is None:
                 continue
 
-            photos = session.get_last_n_photos(PHOTOS_PER_SESSION)
+            photos = session.get_last_n_photos(PHOTOS_PER_SESSION_MODEL_1)
             for photo in photos:
                 crop_photo = _crop_photo(photo)
                 # p = Photo(None, crop_photo, landmarks, None)
