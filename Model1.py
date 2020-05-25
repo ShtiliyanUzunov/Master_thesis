@@ -83,8 +83,12 @@ def _test_model_on_single_photo(model, data):
     print("Predicted emotion: {} {} score: {}".format(emotion_index, emotion_map[str(float(emotion_index))], predicted_emotion[emotion_index]))
     photo.show(showLandmarks = False)
 
-def _load_data_and_model():
+def _load_data_and_model(skip_model = False):
     data = DataLoader()
+
+    if skip_model:
+        return data, None
+
     model = load_model("models_resources\\{}.h5".format(MODEL_NAME))
     return data, model
 
@@ -112,7 +116,7 @@ def _plot_model():
     plot_model(model, to_file="models_resources\\{}.png".format(MODEL_NAME), show_shapes=True, expand_nested=True)
 
 def _train_model():
-    data, _ = _load_data_and_model()
+    data, _ = _load_data_and_model(True)
     x_train, x_test, y_train, y_test = _preprocess_data(data)
     _train_model_common(get_model(), MODEL_NAME, EPOCHS_MODEL_1, x_train, x_test, y_train, y_test)
 
