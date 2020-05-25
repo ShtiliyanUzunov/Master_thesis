@@ -14,7 +14,7 @@ class EmotionModel:
 
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
-        self._clf = SVC(kernel='linear')
+        self._clf = SVC(C=100, kernel='linear')
         self._clf.fit(x_train, y_train)
         
         #self._clf = LinearSVC()

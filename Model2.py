@@ -107,7 +107,7 @@ def _custom_loss(yTrue,yPred):
     return K.sum(K.square(yPred - yTrue))
 
 
-def _preprocess_data(data):
+def _preprocess_data(data, eval_test = False):
     x = []
     y = []
     for subj_name, subject in data.subjects.items():
@@ -116,7 +116,10 @@ def _preprocess_data(data):
                 continue
 
             photos = random.sample(session.photos, min(len(session.photos), PHOTOS_PER_SESSION_MODEL_2))
-            #photos = session.get_last_n_photos(PHOTOS_PER_SESSION)
+
+            if eval_test:
+                photos = session.get_last_n_photos(3)
+
             for photo in photos:
                 crop_photo = _crop_photo(photo)
                 landmarks = list(map(lambda l: [(l[0] - 80) / shrink_ratio, l[1] / shrink_ratio], photo.landmarks))
@@ -169,7 +172,7 @@ def _manual_test():
 
 def _evaluation_test():
     data, landmark_model, emotion_model = _load_data_and_model()
-    _, x_test, _, y_test, _, y_test_emotion = _preprocess_data(data)
+    _, x_test, _, y_test, _, y_test_emotion = _preprocess_data(data, eval_test=True)
 
     pred_lm = landmark_model.predict(np.array(x_test).reshape((len(x_test), DATA_RESOLUTION, DATA_RESOLUTION, 1)))
     mae = mean_absolute_error(y_test, pred_lm)
