@@ -1,5 +1,6 @@
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import plot_confusion_matrix
 import matplotlib.pyplot as plt
 import sys
 
@@ -14,7 +15,7 @@ class EmotionModel:
 
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
 
-        self._clf = SVC(C=100, kernel='linear')
+        self._clf = SVC(C=1000, kernel='linear')
         self._clf.fit(x_train, y_train)
         
         #self._clf = LinearSVC()
@@ -22,6 +23,11 @@ class EmotionModel:
 
         self._trainScore = self._clf.score(x_train, y_train)
         self._testScore = self._clf.score(x_test, y_test)
+
+        plot_confusion_matrix(self._clf, x_test, y_test,
+                              cmap=plt.cm.Blues,
+                              normalize=None)
+        plt.show()
         print("Training score {}. Test score {}.".format(self._trainScore, self._testScore))
 
         #TODO: Refactor this

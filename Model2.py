@@ -182,11 +182,12 @@ def _evaluation_test():
     for lm in pred_lm:
         pred_emotion.append(emotion_model.predict_by_landmarks(lm.reshape(68, 2)))
 
-    conf_mat = confusion_matrix(y_test_emotion, pred_emotion)
     acc = accuracy_score(y_test_emotion, pred_emotion)
     print("Accuracy: {}".format(acc))
 
-    plt.imshow(conf_mat)
+    conf_mat = confusion_matrix(y_test_emotion, pred_emotion)
+    print(conf_mat)
+    plt.imshow(conf_mat, cmap=plt.cm.Blues)
     plt.show()
 
 def _plot_model():
@@ -240,8 +241,8 @@ def _camera_test():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    #_manual_test()
-    _evaluation_test()
+    _manual_test()
+    #_evaluation_test()
     #_camera_test()
     #_train_model()
     #_plot_model()

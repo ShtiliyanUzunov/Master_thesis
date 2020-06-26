@@ -8,8 +8,10 @@ from keras.optimizers import Adam
 from keras.utils import plot_model
 from keras.utils import to_categorical
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import plot_confusion_matrix
 
 import matplotlib.pyplot as plt
 from DataLoader import DataLoader
@@ -103,12 +105,16 @@ def _evaluation_test():
     pred = model.predict(np.array(x_test).reshape((len(x_test), DATA_RESOLUTION, DATA_RESOLUTION, 1)))
     pred = list(map(lambda n: np.argmax(n),pred))
     y_test = list(map(lambda n: np.argmax(n), y_test))
-    conf_mat = confusion_matrix(y_test, pred)
+
 
     acc = accuracy_score(y_test, pred)
     print("Accuracy: {}".format(acc))
+    f1 = f1_score(y_test, pred, average='macro')
+    print("F1 score: {}".format(f1))
 
-    plt.imshow(conf_mat)
+    conf_mat = confusion_matrix(y_test, pred)
+    print(conf_mat)
+    plt.imshow(conf_mat, cmap=plt.cm.Blues)
     plt.show()
 
 def _plot_model():
@@ -165,8 +171,8 @@ def _camera_test():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    _manual_test()
-    #_evaluation_test()
+    #_manual_test()
+    _evaluation_test()
     #_camera_test()
     #_train_model()
     #_plot_model()
