@@ -171,8 +171,8 @@ def _camera_test():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    #_manual_test()
-    _evaluation_test()
+    _manual_test()
+    #_evaluation_test()
     #_camera_test()
     #_train_model()
     #_plot_model()
